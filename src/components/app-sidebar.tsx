@@ -30,7 +30,7 @@ import { usePathname, useRouter } from "next/navigation"
 
 const data = {
   user: {
-    name: "company",
+    name: "Administrator",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },

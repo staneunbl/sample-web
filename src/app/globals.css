@@ -55,18 +55,18 @@
   --secondary: #0077B6;
   --secondary-foreground: #ffffff;
 
-  --accent: #00BFA5;
-  --accent-foreground: #ffffff;
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
 
   /* Functional */
-  --success: #34D399;
+  --success: #00632F;
   --success-light: #D1FAE5;
 
   --warning: #FBBF24;
   --warning-light: #FEF3C7;
 
-  --error: #F87171;
-  --error-light: #FEE2E2;
+  --destructive: #F87171;
+  --destructive-light: #FEE2E2;
 
   --info: #60A5FA;
   --info-light: #DBEAFE;

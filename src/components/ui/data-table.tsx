@@ -94,7 +94,7 @@ export function DataTable<TData, TValue>({
                       return (
                         <TableHead
                           key={header.id}
-                          className="text-muted-foreground border-none font-semibold text-sm sm:text-sm py-2 sm:py-3 text-justify whitespace-nowrap"
+                          className="bg-sidebar text-muted-foreground border-none font-semibold text-sm sm:text-sm py-2 sm:py-3 text-justify whitespace-nowrap"
                         >
                           {header.isPlaceholder
                             ? null
@@ -120,7 +120,7 @@ export function DataTable<TData, TValue>({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="py-2 sm:py-3 text-justify text-xs"
+                        className="py-2 sm:py-2 text-justify text-xs"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

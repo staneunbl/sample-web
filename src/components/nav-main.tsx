@@ -53,7 +53,6 @@ export function NavMain({ groups }: NavMainProps) {
             {group.routes.map((route) =>
               route.subItems && route.subItems.length > 0 ? (
                 // Routes with sub-items
-
                 <Collapsible
                   key={route.label}
                   defaultOpen={route.active || false}

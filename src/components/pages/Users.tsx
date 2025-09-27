@@ -4,12 +4,14 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "../../components/ui/button";
 import {
-  ChevronsUpDown,
+  Eye,
   Filter,
-  InfoIcon,
   Loader,
   MoreHorizontal,
+  Pencil,
+  Plus,
   Search,
+  Trash,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "../../components/ui/input";
@@ -28,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Badge } from "@/components/ui/badge";
 
 export interface UsersItem {
   UserId: number;
@@ -110,7 +113,7 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
   {
     accessorFn: (row) => `${row.FirstName} ${row.MiddleName || ""} ${row.LastName}`,
     id: "FullName",
-    header: "Agent Name",
+    header: "Full Name",
     cell: ({ row }) => {
       const fullName = row.getValue("FullName") as string;
       const firstLetter = fullName.charAt(0).toUpperCase();
@@ -133,11 +136,11 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
       );
     },
   },
-  {
-    accessorKey: "Sex",
-    header: "Sex",
-    cell: ({ row }) => <span>{row.getValue("Sex")}</span>,
-  },
+  // {
+  //   accessorKey: "Sex",
+  //   header: "Sex",
+  //   cell: ({ row }) => <span>{row.getValue("Sex")}</span>,
+  // },
   {
     accessorKey: "Role",
     header: "Role",
@@ -157,14 +160,19 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
     accessorKey: "Status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("Status") as string;
-      const color =
-        status === "Active"
-          ? "text-green-600"
-          : status === "Inactive"
-          ? "text-gray-500"
-          : "text-red-600";
-      return <span className={color}>{status}</span>;
+      let status = row.getValue("Status") as string;
+
+      let variant: "success" | "warning" | "destructive" | "outline" = "outline";
+      if (status === "Active") {
+        variant = "success";
+      } else if (status === "Inactive") {
+        variant = "warning";
+      } else if (status === "Suspended") {
+        variant = "destructive";
+      } else if (!status) {
+        variant = "outline";
+      }
+      return <Badge variant={variant}>{status ?? ""}</Badge>;
     },
   },
   {
@@ -175,24 +183,37 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
 
       return (
         <div className="text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-4 w-4 p-0 sm:h-4 sm:w-4">
-                <span className="sr-only">Open menu</span>
-                {/* Smaller icon */}
-                <MoreHorizontal className="h-1.5 w-1.5 sm:h-2 sm:w-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="text-xs sm:text-sm">
-              <DropdownMenuItem asChild className="text-xs sm:text-sm">
-                {/* <Link href={`/home/crew/details?id=${crew.CrewCode}`}>
-                  <IdCard className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                  View Crew Details
-                </Link> */}
-              </DropdownMenuItem>
-              {/* <DropdownMenuSeparator /> */}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="text-xs" 
+              //onClick={() => handleViewDetails(row.original)}
+              >
+              <Eye className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+              View User
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-xs" 
+              //onClick={() => handleEditDetails(row.original)}
+              >
+              <Pencil className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+              Edit User
+            </DropdownMenuItem>
+            <DropdownMenuSeparator/>
+            <DropdownMenuItem
+              className="text-xs text-destructive" 
+              //onClick={() => handleDelete(row.original)}
+              >
+              <Trash className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+              Delete User
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         </div>
       );
     },
@@ -202,25 +223,25 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
 export default function UsersList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [users, setAgents] = useState<UsersItem[]>([]);
+  const [users, setUsers] = useState<UsersItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 400);
 
-//   useEffect(() => {
-//     const fetchUsers = async () => {
-//       try {
-//         setLoading(true);
-//         const res = await getUsers();
-//         setUsers(res.data);
-//       } catch (err: any) {
-//         setError(err.message || "Failed to fetch agents");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
+  //   useEffect(() => {
+  //     const fetchUsers = async () => {
+  //       try {
+  //         setLoading(true);
+  //         const res = await getUsers();
+  //         setUsers(res.data);
+  //       } catch (err: any) {
+  //         setError(err.message || "Failed to fetch agents");
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
 
-//     fetchUsers();
-//   }, []);
+  //     fetchUsers();
+  //   }, []);
 
   const regex = new RegExp(debouncedSearch, "i");
 
@@ -265,12 +286,17 @@ export default function UsersList() {
       `}</style>
         <div className="h-full overflow-hidden">
           <div className="p-2 sm:py-0 flex flex-col space-y-4 sm:space-y-4 h-full">
-            <div className="flex flex-col space-y-5 sm:space-y-5 min-h-full">
-              <div className="space-y-0.5">
-                <h2 className="text-2xl font-semibold tracking-tight">Users</h2>
-                <p className="text-sm text-muted-foreground">
-                  List of all users.
-                </p>
+            <div className="flex flex-col space-y-5 sm:space-y-3 min-h-full">
+              <div className="flex items-center justify-between">
+                {/* Title & Subtitle */}
+                <div className="space-y-0.5">
+                  <h2 className="text-2xl font-semibold tracking-tight">Users</h2>
+                  <p className="text-sm text-muted-foreground">List of all users.</p>
+                </div>
+                {/* Add Button */}
+                <Button className="w-auto text-sm">
+                  <Plus className="mr-1" /> Add New User
+                </Button>
               </div>
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="flex flex-col md:flex-row items-center gap-3">
@@ -284,7 +310,7 @@ export default function UsersList() {
                     />
                   </div>
                 </div>
-                {/* <div>
+                <div>
                   <Select>
                     <SelectTrigger className="h-8 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-2">
                       <Filter className="h-4 w-4 text-primary" />
@@ -296,17 +322,17 @@ export default function UsersList() {
                       <SelectItem value="pending">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
-                </div> */}
+                </div>
               </div>
               {loading ? (
                 <div className="flex justify-center items-center h-40 gap-2 text-muted-foreground">
                   <Loader className="h-5 w-5 animate-spin" />
                   <p className="text-sm">Loading users data...</p>
                 </div>
-              // ) : filteredAgents.length === 0 ? (
-              //   <div className="flex justify-center items-center h-40">
-              //     <p className="text-muted-foreground">No results found.</p>
-              //   </div>
+                // ) : filteredUsers.length === 0 ? (
+                //   <div className="flex justify-center items-center h-40">
+                //     <p className="text-muted-foreground">No results found.</p>
+                //   </div>
               ) : (
                 <div className="bg-white rounded-md pb-3">
                   <DataTable columns={usersColumns} pageSize={10} data={filteredUsers} />
