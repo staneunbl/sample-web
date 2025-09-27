@@ -69,3 +69,17 @@ export const deleteUser = async (userId: number) => {
     };
   }
 };
+
+export const archiveUser = async (userId: number) => {
+  try {
+    const response = await axiosInstance.delete(`/users/${userId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error deleting user:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Failed to delete user",
+    };
+  }
+};
+
