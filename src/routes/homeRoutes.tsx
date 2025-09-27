@@ -47,13 +47,13 @@ export const getHomeRoutes = (pathname: string, userType: number): SidebarGroupD
               allowedUserTypes: [1, 3, 4, 5]
             },
             {
-              label: "Managers",
+              label: "Managers", // for testing only
               href: "/users/managers",
               active: pathname === "/users/managers",
               allowedUserTypes: [1, 3, 4, 5]
             },
             {
-              label: "Executives",
+              label: "Executives", // for testing only
               href: "/users/executives",
               active: pathname === "/users/executives",
               allowedUserTypes: [1, 3, 4, 5]
@@ -63,13 +63,13 @@ export const getHomeRoutes = (pathname: string, userType: number): SidebarGroupD
       ],
     },
       {
-      label: "For Approvals",
+      label: "For Approvals", // for testing only
       routes: [
         {
-          label: "Users Registration",
+          label: "Users Registrations",
           icon: UserCheck2,
-          href: "/users-registration",
-          active: pathname.startsWith("/users-registration"),
+          href: "/users-registrations",
+          active: pathname.startsWith("/users-registratios"),
           allowedUserTypes: [1, 3, 4, 5],
         },
       ],

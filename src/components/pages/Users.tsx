@@ -131,7 +131,7 @@ export const usersColumns: ColumnDef<UsersItem>[] = [
           <div className={`w-6 h-6 rounded-full ${bgColor} flex items-center justify-center text-gray-600 text-xs font-medium`}>
             {firstLetter}
           </div>
-          <div className="text-xs font-semibold ml-1">{fullName.toLocaleUpperCase()}</div>
+          <div className="text-xs font-semibold ml-1 underline pointer-events-auto">{fullName.toLocaleUpperCase()}</div>
         </div>
       );
     },
@@ -286,7 +286,7 @@ export default function UsersList() {
       `}</style>
         <div className="h-full overflow-hidden">
           <div className="p-2 sm:py-0 flex flex-col space-y-4 sm:space-y-4 h-full">
-            <div className="flex flex-col space-y-5 sm:space-y-3 min-h-full">
+            <div className="flex flex-col space-y-5 sm:space-y-4 min-h-full">
               <div className="flex items-center justify-between">
                 {/* Title & Subtitle */}
                 <div className="space-y-0.5">
