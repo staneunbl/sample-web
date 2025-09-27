@@ -18,61 +18,92 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+export interface SubItem {
+  label: string
+  href: string
+  active: boolean
+}
+
+export interface RouteItem {
+  label: string
+  icon?: React.ElementType
+  href: string
+  active: boolean
+  subItems?: SubItem[]
+}
+
+export interface SidebarGroupData {
+  label: string
+  routes: RouteItem[]
+}
+
+interface NavMainProps {
+  groups: SidebarGroupData[]
+}
+
+export function NavMain({ groups }: NavMainProps) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
-            </SidebarMenuItem>
-          </Collapsible>
-        ))}
-      </SidebarMenu>
+      {groups.map((group) => (
+        <div key={group.label} className="mb-4">
+          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          <SidebarMenu className="gap-0.5">
+            {group.routes.map((route) =>
+              route.subItems && route.subItems.length > 0 ? (
+                // Routes with sub-items
+
+                <Collapsible
+                  key={route.label}
+                  defaultOpen={route.active || false}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={route.label}>
+                        {route.icon && <route.icon className="w-4 h-4 mr-2" />}
+                        <span>{route.label}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {route.subItems.map((sub) => (
+                          <SidebarMenuSubItem key={sub.label}>
+                            <SidebarMenuSubButton asChild>
+                              <Link
+                                href={sub.href}
+                                className={sub.active ? "font-semibold" : ""}
+                              >
+                                {sub.label}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ) : (
+                // Routes without sub-items
+                <SidebarMenuItem key={route.label}>
+                  <SidebarMenuButton asChild tooltip={route.label}>
+                    <Link
+                      href={route.href}
+                      className={route.active ? "font-semibold" : ""}
+                    >
+                      {route.icon && <route.icon className="w-4 h-4 mr-2" />}
+                      <span>{route.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            )}
+          </SidebarMenu>
+        </div>
+      ))}
     </SidebarGroup>
   )
 }
