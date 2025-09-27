@@ -34,31 +34,20 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-
-export interface UsersItem {
-  UserId: number;
-  UserCode: string;
-  FirstName: string;
-  MiddleName?: string;
-  LastName: string;
-  Sex: "Male" | "Female" | "Other";
-  Role: string;
-  DateOfBirth?: string;   // ISO format
-  Email?: string;
-  PhoneNumber?: string;
-  Status?: "Active" | "Inactive" | "Suspended";
-}
+import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
 
 interface ActionDialogProps {
-  itemId: number | string;
+  _id: string;
+  itemId: number;
   actionType: "archive" | "delete";
-  onConfirm: (id: number | string) => void;
+  onConfirm: (id: string) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  itemName?: string; // optional, for display
+  itemName?: string;
 }
 
 function ActionDialog({
+  _id,
   itemId,
   actionType,
   onConfirm,
@@ -83,7 +72,7 @@ function ActionDialog({
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
             Do you want to {actionType ? actionLabels[actionType].toLowerCase() : ""}{" "}
-            {itemName ? `"${itemName}"` : `item with ID ${itemId}`}? This action
+            {itemName ? `"${itemName}" "${itemId}"` : `item with ID ${itemId}`}? This action
             cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -92,7 +81,7 @@ function ActionDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className={`text-white font-semibold px-4 py-2 rounded-md transition-colors duration-200 ${actionColors[actionType]}`}
-            onClick={() => onConfirm(itemId)}
+            onClick={() => onConfirm(_id)}
           >
             {actionLabels[actionType]}
           </AlertDialogAction>
@@ -101,59 +90,6 @@ function ActionDialog({
     </AlertDialog>
   );
 }
-
-export const usersData: UsersItem[] = [
-  {
-    UserId: 1,
-    UserCode: "USR001",
-    FirstName: "Juan",
-    MiddleName: "Dela",
-    LastName: "Cruz",
-    Sex: "Male",
-    Role: "Admin",
-    DateOfBirth: "1990-05-21",
-    Email: "juan.cruz@example.com",
-    PhoneNumber: "09171234567",
-    Status: "Active",
-  },
-  {
-    UserId: 2,
-    UserCode: "USR002",
-    FirstName: "Maria",
-    LastName: "Santos",
-    Sex: "Female",
-    Role: "Manager",
-    DateOfBirth: "1988-11-10",
-    Email: "maria.santos@example.com",
-    PhoneNumber: "09181234567",
-    Status: "Active",
-  },
-  {
-    UserId: 3,
-    UserCode: "USR003",
-    FirstName: "Carlo",
-    LastName: "Reyes",
-    Sex: "Male",
-    Role: "Staff",
-    DateOfBirth: "1995-03-15",
-    Email: "carlo.reyes@example.com",
-    PhoneNumber: "09201234567",
-    Status: "Inactive",
-  },
-  {
-    UserId: 4,
-    UserCode: "USR004",
-    FirstName: "Angela",
-    MiddleName: "Lopez",
-    LastName: "Torres",
-    Sex: "Female",
-    Role: "Reader",
-    DateOfBirth: "2000-07-05",
-    Email: "angela.torres@example.com",
-    PhoneNumber: "09351234567",
-    Status: "Suspended",
-  },
-];
 
 export default function UsersList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -166,25 +102,27 @@ export default function UsersList() {
   const [actionType, setActionType] = useState<"archive" | "delete" | null>(null);
   const [open, setOpen] = useState(false);
 
-  //   useEffect(() => {
-  //     const fetchUsers = async () => {
-  //       try {
-  //         setLoading(true);
-  //         const res = await getUsers();
-  //         setUsers(res.data);
-  //       } catch (err: any) {
-  //         setError(err.message || "Failed to fetch agents");
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await getUsers(); // getUsers - function ko -> api -> backend
+        setUsers(res.data); // container
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch agents");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //     fetchUsers();
-  //   }, []);
+    fetchUsers();
+  }, []);
+
+  console.log('USERS DATA IN THE USER PAGE: ', users);
 
   const regex = new RegExp(debouncedSearch, "i");
 
-  const filteredUsers = usersData.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const fullName = `${user.FirstName} ${user.MiddleName || ""} ${user.LastName}`;
     return (
       regex.test(fullName) ||
@@ -283,66 +221,66 @@ export default function UsersList() {
 
         return (
           <div className="text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem className="text-xs" 
-                onClick={() => {
-                  setSelectedUser(row.original);
-                  setActionType("archive");
-                  setOpen(true);
-                }}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="text-xs"
+                  onClick={() => {
+                    setSelectedUser(row.original);
+                    setActionType("archive");
+                    setOpen(true);
+                  }}
                 >
-                <Eye className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                View User
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-xs" 
+                  <Eye className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  View User
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-xs"
                 //onClick={() => handleEditDetails(row.original)}
                 >
-                <Pencil className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                Edit User
-              </DropdownMenuItem>
-              <DropdownMenuSeparator/>
-              <DropdownMenuItem
-                className="text-xs"
-                variant="archive"
-                onClick={() => {
-                  setSelectedUser(row.original);
-                  setActionType("archive");
-                  setOpen(true);
-                }}
+                  <Pencil className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  Edit User
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-xs"
+                  variant="archive"
+                  onClick={() => {
+                    setSelectedUser(row.original);
+                    setActionType("archive");
+                    setOpen(true);
+                  }}
                 >
-                <Archive className="text-warning mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                Archive User
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-xs"
-                variant="destructive" 
-                onClick={() => {
-                  setSelectedUser(row.original);
-                  setActionType("delete");
-                  setOpen(true);
-                }}
+                  <Archive className="text-warning mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  Archive User
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-xs"
+                  variant="destructive"
+                  onClick={() => {
+                    setSelectedUser(row.original);
+                    setActionType("delete");
+                    setOpen(true);
+                  }}
                 >
-                <Trash className="text-destructive mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                Delete User
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <Trash className="text-destructive mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  Delete User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },
     },
   ];
 
-  const handleArchive = async (userId: number) => {
+  const handleArchive = async (_id: string) => {
     try {
-      //await archiveUser(userId); // your API call
+      await archiveUser(_id);
       toast({
         title: "Archived!",
         variant: "success",
@@ -358,9 +296,9 @@ export default function UsersList() {
     }
   };
 
-  const handleDelete = async (userId: number) => {
+  const handleDelete = async (_id: string) => {
     try {
-      //await deleteUser(userId); // your API call
+      await deleteUser(_id); // your API call
       toast({
         title: "Deleted!",
         variant: "success",
@@ -464,19 +402,20 @@ export default function UsersList() {
           </div>
         </div>
       </div>
-    <ActionDialog
-      itemId={selectedUser?.UserId ?? 0}
-      itemName={selectedUser?.FirstName + " " + selectedUser?.LastName}
-      actionType={actionType!}
-      open={open}
-      onOpenChange={setOpen}
-      onConfirm={async (id) => {
-        const numericId = Number(id); // convert string to number
-        if (actionType === "archive") await handleArchive(numericId);
-        if (actionType === "delete") await handleDelete(numericId);
-        setOpen(false);
-      }}
-    />
+      <ActionDialog
+        _id={selectedUser?._id}
+        itemId={selectedUser?.UserId ?? 0}
+        itemName={selectedUser?.FirstName + " " + selectedUser?.LastName}
+        actionType={actionType!}
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={async (_id: string) => {
+          //const numericId = Number(_id); // convert string to number
+          if (actionType === "archive") await handleArchive(_id); 
+          if (actionType === "delete") await handleDelete(_id);
+          setOpen(false);
+        }}
+      />
     </>
   );
 }

@@ -1,30 +1,31 @@
 import axiosInstance from "@/lib/axios";
 
 export interface UsersItem {
-  [x: string]: any;
-  UserID: number;
-  userId?: number;
-  Name: string;
-  FirstName?: string;
-  LastName?: string;
-  UserType: number;
-  Role: any;
+  _id: string;
+  UserId: number;           // matches Zod schema
+  UserCode: string;
+  FirstName: string;
+  MiddleName?: string;
+  LastName: string;
+  Sex: 'Male' | 'Female';
+  Role: string;
+  DateOfBirth: string;      // ISO date string
   Email: string;
-  IsVerified: boolean;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: string;
+  PhoneNumber: string;
+  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Archived?: boolean;
+  archivedAt?: string;
 }
 
 export interface UsersResponse {
   success: boolean;
-  data: UsersItem;
+  data: UsersItem[];
   message?: string;
 }
 
-export const getUsersList = async (): Promise<UsersResponse> => {
+export const getUsers = async (): Promise<UsersResponse> => {
   const response = await axiosInstance.get<UsersResponse>("/users");
+  console.log(response);
   return response.data;
 };
 
@@ -57,9 +58,9 @@ export const updateUser = async (payload: UpdateUserPayload): Promise<UsersRespo
   return response.data;
 };
 
-export const deleteUser = async (userId: number) => {
+export const deleteUser = async (_id: string) => {
   try {
-    const response = await axiosInstance.delete(`/users/${userId}`);
+    const response = await axiosInstance.delete(`/users/hard/${_id}`);
     return response.data;
   } catch (error: any) {
     console.error("Error deleting user:", error);
@@ -70,12 +71,13 @@ export const deleteUser = async (userId: number) => {
   }
 };
 
-export const archiveUser = async (userId: number) => {
+export const archiveUser = async (_id: string) => {
   try {
-    const response = await axiosInstance.delete(`/users/${userId}`);
+    const response = await axiosInstance.patch(`/users/archive/${_id}`);
+    console.log(response);
     return response.data;
   } catch (error: any) {
-    console.error("Error deleting user:", error);
+    console.error("Error archiving user:", error);
     return {
       success: false,
       message: error.response?.data?.message || "Failed to delete user",
