@@ -35,6 +35,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
+import EditUserDialog from "../dialogs/EditUserDialog";
+import { AddUserDialog } from "../dialogs/AddUserDialog";
 
 interface ActionDialogProps {
   _id: string;
@@ -101,20 +103,22 @@ export default function UsersList() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [actionType, setActionType] = useState<"archive" | "delete" | null>(null);
   const [open, setOpen] = useState(false);
+  const [editselectedUserDialogOpen, setEditselectedUserDialogOpen] = useState(false);
+  const [addselectedUserDialogOpen, setAddselectedUserDialogOpen] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await getUsers();
+      setUsers(res.data); 
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const res = await getUsers(); // getUsers - function ko -> api -> backend
-        setUsers(res.data); // container
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch agents");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -131,11 +135,11 @@ export default function UsersList() {
   });
 
   const usersColumns: ColumnDef<UsersItem>[] = [
-    {
-      accessorKey: "UserId",
-      header: "ID",
-      cell: ({ row }) => <span>{row.getValue("UserId")}</span>,
-    },
+    // {
+    //   accessorKey: "UserId",
+    //   header: "ID",
+    //   cell: ({ row }) => <span>{row.getValue("UserId")}</span>,
+    // },
     {
       accessorKey: "UserCode",
       header: "Code",
@@ -286,6 +290,8 @@ export default function UsersList() {
         variant: "success",
         description: "The user has been successfully archived.",
       });
+
+      fetchUsers();
     } catch (error) {
       console.error("Error archiving user:", error);
       toast({
@@ -304,6 +310,7 @@ export default function UsersList() {
         variant: "success",
         description: "The user has been successfully deleted.",
       });
+      fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
       toast({
@@ -354,7 +361,10 @@ export default function UsersList() {
                   <p className="text-sm text-muted-foreground">List of all users.</p>
                 </div>
                 {/* Add Button */}
-                <Button className="w-auto text-sm">
+                <Button 
+                  className="w-auto text-sm pointer-events-auto"
+                  onClick={() => setAddselectedUserDialogOpen(true)}
+                >
                   <Plus className="mr-1" /> Add New User
                 </Button>
               </div>
@@ -402,6 +412,25 @@ export default function UsersList() {
           </div>
         </div>
       </div>
+      
+      <AddUserDialog
+        open={addselectedUserDialogOpen}
+        onOpenChange={setAddselectedUserDialogOpen}
+        onSuccess={(newUser: UsersItem) => {
+          setUsers((prev) => [...prev, newUser]);
+        }}      
+      />
+
+      {/* <EditUserDialog
+        open={editselectedUserDialogOpen}
+        selectedUser={selectedUser}
+        onOpenChange={setEditselectedUserDialogOpen}
+        // onSuccess={(newUser) => {
+        //   setUserData((prev) => [...prev, newUser]);
+        // }}
+        onSuccess={handleEditSubmit}      
+      /> */}
+      
       <ActionDialog
         _id={selectedUser?._id}
         itemId={selectedUser?.UserId ?? 0}

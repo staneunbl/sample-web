@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axios";
 
 export interface UsersItem {
-  _id: string;
+  _id?: string;
   UserId: number;           // matches Zod schema
   UserCode: string;
   FirstName: string;
@@ -30,15 +30,23 @@ export const getUsers = async (): Promise<UsersResponse> => {
 };
 
 export interface AddUserPayload {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  role: number;
+  UserId: number;           // matches Zod schema
+  UserCode: string;
+  FirstName: string;
+  MiddleName?: string;
+  LastName: string;
+  Sex: 'Male' | 'Female';
+  Role: string;
+  DateOfBirth: string;      // ISO date string
+  Email: string;
+  PhoneNumber: string;
+  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Archived?: boolean;
+  archivedAt?: string;
 }
 
 export const addUsers = async (payload: AddUserPayload): Promise<UsersResponse> => {
-  const response = await axiosInstance.post<UsersResponse>("/auth/register", payload);
+  const response = await axiosInstance.post<UsersResponse>("/users", payload);
   return response.data;
 };
 
