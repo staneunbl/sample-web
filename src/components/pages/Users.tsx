@@ -35,8 +35,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
-import EditUserDialog from "../dialogs/EditUserDialog";
 import { AddUserDialog } from "../dialogs/AddUserDialog";
+import { EditUserDialog } from "../dialogs/EditUserDialog";
 
 interface ActionDialogProps {
   _id: string;
@@ -127,7 +127,7 @@ export default function UsersList() {
   const regex = new RegExp(debouncedSearch, "i");
 
   const filteredUsers = users.filter((user) => {
-    const fullName = `${user.FirstName} ${user.MiddleName || ""} ${user.LastName}`;
+    const fullName = `${user.FirstName} ${user.MiddleName || ""} ${user.LastName}`.replace(/\s+/g, ' ').trim();
     return (
       regex.test(fullName) ||
       regex.test(user.UserCode.toString())
@@ -244,6 +244,10 @@ export default function UsersList() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-xs"
+                  onClick={() => {
+                    setSelectedUser(row.original);
+                    setEditselectedUserDialogOpen(true);
+                  }}
                 //onClick={() => handleEditDetails(row.original)}
                 >
                   <Pencil className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
@@ -320,6 +324,21 @@ export default function UsersList() {
       });
     }
   };
+
+  const handleEditSubmit = (updatedUser: UsersItem) => {
+    setUsers((prevUsers) => {
+      return prevUsers.map((user) =>
+        user._id === updatedUser._id ? { ...user, ...updatedUser } : user
+      );
+    });
+
+    toast({
+      title: "User Updated",
+      description: `${updatedUser.FirstName} ${updatedUser.LastName} has been updated successfully.`,
+      variant: "success",
+    });
+  };
+
 
   if (error) return <p>Error: {error}</p>
 
@@ -421,7 +440,7 @@ export default function UsersList() {
         }}      
       />
 
-      {/* <EditUserDialog
+      <EditUserDialog
         open={editselectedUserDialogOpen}
         selectedUser={selectedUser}
         onOpenChange={setEditselectedUserDialogOpen}
@@ -429,7 +448,7 @@ export default function UsersList() {
         //   setUserData((prev) => [...prev, newUser]);
         // }}
         onSuccess={handleEditSubmit}      
-      /> */}
+      />
       
       <ActionDialog
         _id={selectedUser?._id}

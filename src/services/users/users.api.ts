@@ -51,17 +51,33 @@ export const addUsers = async (payload: AddUserPayload): Promise<UsersResponse> 
 };
 
 export interface UpdateUserPayload {
-  userId: number; 
-  firstName: string;
-  userType: number; 
-  lastName: string;
+  _id?: string;
+  UserId: number;           // matches Zod schema
+  UserCode: string;
+  FirstName: string;
+  MiddleName?: string;
+  LastName: string;
+  Sex: 'Male' | 'Female';
+  Role: string;
+  DateOfBirth: string;      // ISO date string
+  Email: string;
+  PhoneNumber: string;
+  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Archived?: boolean;
+  archivedAt?: string;
 }
 
 export const updateUser = async (payload: UpdateUserPayload): Promise<UsersResponse> => {
-  const response = await axiosInstance.patch<UsersResponse>(`/users/${payload.userId}`, {
-    firstName: payload.firstName,
-    lastName: payload.lastName,
-    userType: payload.userType,
+  const response = await axiosInstance.patch<UsersResponse>(`/users/${payload._id}`, {
+    FirstName: payload.FirstName,
+    MiddleName: payload.MiddleName,
+    LastName: payload.LastName,
+    Sex: payload.Sex,
+    Role: payload.Role,
+    DateOfBirth: payload.DateOfBirth,
+    Email: payload.Email,
+    PhoneNumber: payload.PhoneNumber,
+
   });
   return response.data;
 };
