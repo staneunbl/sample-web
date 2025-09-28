@@ -32,11 +32,22 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
 import { AddUserDialog } from "../dialogs/AddUserDialog";
 import { EditUserDialog } from "../dialogs/EditUserDialog";
+import ViewUserDrawer from "../dialogs/ViewUserDrawer";
 
 interface ActionDialogProps {
   _id: string;
@@ -105,12 +116,13 @@ export default function UsersList() {
   const [open, setOpen] = useState(false);
   const [editselectedUserDialogOpen, setEditselectedUserDialogOpen] = useState(false);
   const [addselectedUserDialogOpen, setAddselectedUserDialogOpen] = useState(false);
+  const [viewselectedUserDrawerOpen, setViewselectedUserDrawerOpen] = useState(false);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const res = await getUsers();
-      setUsers(res.data); 
+      setUsers(res.data);
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
     } finally {
@@ -170,7 +182,10 @@ export default function UsersList() {
             </div>
             <div
               className="text-xs font-semibold ml-1 underline cursor-pointer pointer-events-auto"
-              onClick={() => console.log(`${fullName} clicked`)}
+              onClick={() => {
+                setSelectedUser(row.original);
+                setViewselectedUserDrawerOpen(true);
+              }}
             >
               {fullName.toLocaleUpperCase()}
             </div>
@@ -235,8 +250,7 @@ export default function UsersList() {
                 <DropdownMenuItem className="text-xs"
                   onClick={() => {
                     setSelectedUser(row.original);
-                    setActionType("archive");
-                    setOpen(true);
+                    setViewselectedUserDrawerOpen(true);
                   }}
                 >
                   <Eye className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
@@ -248,7 +262,6 @@ export default function UsersList() {
                     setSelectedUser(row.original);
                     setEditselectedUserDialogOpen(true);
                   }}
-                //onClick={() => handleEditDetails(row.original)}
                 >
                   <Pencil className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
                   Edit User
@@ -380,7 +393,7 @@ export default function UsersList() {
                   <p className="text-sm text-muted-foreground">List of all users.</p>
                 </div>
                 {/* Add Button */}
-                <Button 
+                <Button
                   className="w-auto text-sm pointer-events-auto"
                   onClick={() => setAddselectedUserDialogOpen(true)}
                 >
@@ -431,25 +444,32 @@ export default function UsersList() {
           </div>
         </div>
       </div>
-      
+
       <AddUserDialog
         open={addselectedUserDialogOpen}
         onOpenChange={setAddselectedUserDialogOpen}
         onSuccess={(newUser: UsersItem) => {
           setUsers((prev) => [...prev, newUser]);
-        }}      
+        }}
       />
 
-      <EditUserDialog
-        open={editselectedUserDialogOpen}
-        selectedUser={selectedUser}
-        onOpenChange={setEditselectedUserDialogOpen}
-        // onSuccess={(newUser) => {
-        //   setUserData((prev) => [...prev, newUser]);
-        // }}
-        onSuccess={handleEditSubmit}      
-      />
-      
+      {selectedUser && editselectedUserDialogOpen && (
+        <EditUserDialog
+          open={editselectedUserDialogOpen}
+          selectedUser={selectedUser}
+          onOpenChange={setEditselectedUserDialogOpen}
+          onSuccess={handleEditSubmit}
+        />
+      )}
+
+      {selectedUser && viewselectedUserDrawerOpen && (
+        <ViewUserDrawer
+          open={viewselectedUserDrawerOpen}
+          selectedUser={selectedUser}
+          onOpenChange={setViewselectedUserDrawerOpen}
+        />
+      )}
+
       <ActionDialog
         _id={selectedUser?._id}
         itemId={selectedUser?.UserId ?? 0}
@@ -458,8 +478,7 @@ export default function UsersList() {
         open={open}
         onOpenChange={setOpen}
         onConfirm={async (_id: string) => {
-          //const numericId = Number(_id); // convert string to number
-          if (actionType === "archive") await handleArchive(_id); 
+          if (actionType === "archive") await handleArchive(_id);
           if (actionType === "delete") await handleDelete(_id);
           setOpen(false);
         }}
