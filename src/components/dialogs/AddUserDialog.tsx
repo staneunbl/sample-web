@@ -37,15 +37,25 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 const userSchema = z.object({
-  FirstName: z.string().min(1, "First name is required"),
-  MiddleName: z.string().optional(),
-  LastName: z.string().min(1, "Last name is required"),
+  FirstName: z
+    .string()
+    .min(1, "First name is required")
+    .refine((val) => val.trim().length > 0, "First name cannot be empty or spaces"),
+  MiddleName: z
+    .string()
+    .optional()
+    .refine((val) => !val || val.trim().length > 0, "Middle name cannot be just spaces"),
+  LastName: z
+    .string()
+    .min(1, "Last name is required")
+    .refine((val) => val.trim().length > 0, "Last name cannot be empty or spaces"),
   Sex: z.enum(["Male", "Female"]),
   Role: z.string().nonempty("Please select a role"),
   DateOfBirth: z.string().nonempty("Date of Birth is required"),
   Email: z.string().nonempty("Email is required").email("Invalid email"),
   PhoneNumber: z
     .string()
+    .refine((val) => !val || val.trim().length > 0, "Phone Number cannot be just spaces")
     .min(10, "Phone number must be at least 10 digits")
     .max(11, "Phone number cannot exceed 11 digits"),
 });
@@ -258,7 +268,7 @@ export function AddUserDialog({
               <FormField
                 control={form.control}
                 name="Sex"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem className="w-full gap-2 mt-1">
                     <FormLabel>Sex</FormLabel>
                     <FormControl>
@@ -266,7 +276,14 @@ export function AddUserDialog({
                         onValueChange={field.onChange}
                         value={field.value}
                       >
-                        <SelectTrigger className="w-full rounded-md h-10 gap-2 border-[#E0E0E0]">
+                        <SelectTrigger
+                          className={cn(
+                            "w-full rounded-md h-10",
+                            fieldState.invalid
+                              ? "border-red-500 focus:ring-red-500"
+                              : "border-[#E0E0E0]"
+                          )}
+                        >
                           <SelectValue placeholder="Select Sex" />
                         </SelectTrigger>
                         <SelectContent>
