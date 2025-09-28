@@ -14,16 +14,12 @@ import {
   DrawerOverlay,
   DrawerPortal,
 } from "@/components/ui/drawer";
+import { formatDateForInput } from "@/hooks/use-formattedDate";
 
 interface ViewUserDrawerProps {
   selectedUser: UsersItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-function formatDateForInput(isoDate?: string) {
-  if (!isoDate) return "";
-  return isoDate.split("T")[0]; // "1990-05-21"
 }
 
 export default function ViewUserDrawer({

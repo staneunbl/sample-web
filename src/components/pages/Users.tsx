@@ -133,8 +133,6 @@ export default function UsersList() {
     fetchUsers();
   }, []);
 
-  console.log('USERS DATA IN THE USER PAGE: ', users);
-
   const regex = new RegExp(debouncedSearch, "i");
 
   const filteredUsers = users.filter((user) => {
@@ -222,6 +220,8 @@ export default function UsersList() {
         if (status === "Active") {
           variant = "success";
         } else if (status === "Inactive") {
+          variant = "warning";
+        } else if (status === "Archived") {
           variant = "warning";
         } else if (status === "Suspended") {
           variant = "destructive";

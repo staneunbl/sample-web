@@ -43,7 +43,7 @@ export default function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    console.log("Login values:", values);
+    //console.log("Login values:", values);
 
     // TODO: Replace with API call
     setTimeout(() => {

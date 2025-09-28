@@ -12,7 +12,7 @@ export interface UsersItem {
   DateOfBirth: string;      // ISO date string
   Email: string;
   PhoneNumber: string;
-  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Status?: 'Active' | 'Archived' | 'Suspended';
   Archived?: boolean;
   archivedAt?: string;
 }
@@ -42,7 +42,7 @@ export interface AddUserPayload {
   DateOfBirth: string;      // ISO date string
   Email: string;
   PhoneNumber: string;
-  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Status?: 'Active' | 'Archived' | 'Suspended';
   Archived?: boolean;
   archivedAt?: string;
 }
@@ -60,17 +60,17 @@ export const addUsers = async (payload: AddUserPayload): Promise<UsersAddRespons
 
 export interface UpdateUserPayload {
   _id?: string;
-  UserId: number;           // matches Zod schema
+  UserId: number;
   UserCode: string;
   FirstName: string;
   MiddleName?: string;
   LastName: string;
   Sex: 'Male' | 'Female';
   Role: string;
-  DateOfBirth: string;      // ISO date string
+  DateOfBirth: string;
   Email: string;
   PhoneNumber: string;
-  Status?: 'Active' | 'Inactive' | 'Suspended';
+  Status?: 'Active' | 'Archived' | 'Suspended';
   Archived?: boolean;
   archivedAt?: string;
 }
@@ -106,7 +106,6 @@ export const deleteUser = async (_id: string) => {
 export const archiveUser = async (_id: string) => {
   try {
     const response = await axiosInstance.patch(`/users/archive/${_id}`);
-    console.log(response);
     return response.data;
   } catch (error: any) {
     console.error("Error archiving user:", error);

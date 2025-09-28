@@ -36,6 +36,7 @@ import {
   updateUser,
 } from "@/services/users/users.api";
 import { toast } from "@/hooks/use-toast";
+import { formatDateForInput } from "@/hooks/use-formattedDate";
 
 const userSchema = z.object({
   FirstName: z.string().min(1, "First name is required"),
@@ -60,11 +61,6 @@ interface EditUserDialog {
   onSuccess: (newUser: UsersItem) => void;
 }
 
-function formatDateForInput(isoDate?: string) {
-  if (!isoDate) return "";
-  return isoDate.split("T")[0]; // "1990-05-21"
-}
-
 export function EditUserDialog({
   open,
   selectedUser,
@@ -84,8 +80,6 @@ export function EditUserDialog({
       PhoneNumber: "",
     },
   });
-
-  console.log("in the edit dialog", selectedUser);
 
   const { reset, formState } = form;
   const { isSubmitting } = formState;
@@ -362,7 +356,7 @@ export function EditUserDialog({
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  "Adding..."
+                  "Editing..."
                 ) : (
                   <>
                     <Pencil className="w-4 h-4 mr-2" />
