@@ -41,7 +41,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
 } from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
@@ -121,7 +120,7 @@ export default function UsersList() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await getUsers();
+      const res = await getUsers(1, 50);
       setUsers(res.data);
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
@@ -142,16 +141,16 @@ export default function UsersList() {
     const fullName = `${user.FirstName} ${user.MiddleName || ""} ${user.LastName}`.replace(/\s+/g, ' ').trim();
     return (
       regex.test(fullName) ||
-      regex.test(user.UserCode.toString())
+      regex.test(user.UserCode?.toString() || "")
     );
   });
 
   const usersColumns: ColumnDef<UsersItem>[] = [
-    // {
-    //   accessorKey: "UserId",
-    //   header: "ID",
-    //   cell: ({ row }) => <span>{row.getValue("UserId")}</span>,
-    // },
+    {
+      accessorKey: "UserId",
+      header: "ID",
+      cell: ({ row }) => <span>{row.getValue("UserId")}</span>,
+    },
     {
       accessorKey: "UserCode",
       header: "Code",
@@ -431,10 +430,10 @@ export default function UsersList() {
                   <Loader className="h-5 w-5 animate-spin" />
                   <p className="text-sm">Loading users data...</p>
                 </div>
-                // ) : filteredUsers.length === 0 ? (
-                //   <div className="flex justify-center items-center h-40">
-                //     <p className="text-muted-foreground">No results found.</p>
-                //   </div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-muted-foreground">No results found.</p>
+                  </div>
               ) : (
                 <div className="bg-white rounded-md pb-3">
                   <DataTable columns={usersColumns} pageSize={10} data={filteredUsers} />

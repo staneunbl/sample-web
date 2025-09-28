@@ -21,6 +21,11 @@ interface ViewUserDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
+function formatDateForInput(isoDate?: string) {
+  if (!isoDate) return "";
+  return isoDate.split("T")[0]; // "1990-05-21"
+}
+
 export default function ViewUserDrawer({
   selectedUser,
   open,
@@ -89,7 +94,7 @@ export default function ViewUserDrawer({
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Date of Birth:</span>
-                <span>{selectedUser.DateOfBirth}</span>
+                <span>{formatDateForInput(selectedUser.DateOfBirth)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Email:</span>

@@ -119,13 +119,11 @@ export function EditUserDialog({
   }, [selectedUser, form]);
 
   const onSubmit = async (data: UserFormValues) => {
-    //console.log("Form submitted with data:", data); // log the raw form values
-
     try {
       const payload: UpdateUserPayload = {
         _id: selectedUser?._id,
-        UserId: Date.now(),
-        UserCode: `USER${Date.now()}`,
+        UserId: selectedUser?.UserId,
+        UserCode: selectedUser?.UserCode || "",
         FirstName: data.FirstName,
         LastName: data.LastName,
         MiddleName: data.MiddleName || "",
@@ -136,10 +134,7 @@ export function EditUserDialog({
         DateOfBirth: new Date(data.DateOfBirth).toISOString(),
       };
 
-      //console.log("Payload sent to API:", payload); // log the payload
-
       const response = await updateUser(payload);
-      //console.log("API response:", response); // log the API response
 
       if (response && response.success) {
         const newUser: UsersItem = {
@@ -147,11 +142,7 @@ export function EditUserDialog({
           Status: "Active",
           Archived: false,
           ...payload,
-          MiddleName: payload.MiddleName || "",
-          PhoneNumber: payload.PhoneNumber || "",
         };
-
-        //console.log("New user object:", newUser); // log the new user object
 
         onSuccess(newUser);
 

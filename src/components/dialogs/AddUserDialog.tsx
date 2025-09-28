@@ -94,12 +94,8 @@ export function AddUserDialog({
   }, [open, reset]);
 
   const onSubmit = async (data: UserFormValues) => {
-    //console.log("Form submitted with data:", data); // log the raw form values
-
     try {
       const payload: AddUserPayload = {
-        UserId: Date.now(),
-        UserCode: `USER${Date.now()}`,
         FirstName: data.FirstName,
         LastName: data.LastName,
         MiddleName: data.MiddleName || "",
@@ -110,28 +106,23 @@ export function AddUserDialog({
         DateOfBirth: new Date(data.DateOfBirth).toISOString(),
       };
 
-      //console.log("Payload sent to API:", payload); // log the payload
-
       const response = await addUsers(payload);
-      //console.log("API response:", response); // log the API response
 
-      if (response && response.success) {
+      if (response && response.success && response.data) {
         const newUser: UsersItem = {
+          _id: response.data._id,
+          UserId: 0,
+          UserCode: response.data.UserCode,
+          ...payload,
           Status: "Active",
           Archived: false,
-          ...payload,
-          MiddleName: payload.MiddleName || "",
-          PhoneNumber: payload.PhoneNumber || "",
         };
-
-        //console.log("New user object:", newUser); // log the new user object
 
         onSuccess(newUser);
 
         toast({
           title: "User Created",
-          description:
-            "The user has been successfully added.",    
+          description: "The user has been successfully added.",
           variant: "success",
         });
 

@@ -1,9 +1,9 @@
 import axiosInstance from "@/lib/axios";
 
 export interface UsersItem {
-  _id?: string;
+  _id: string;
   UserId: number;           // matches Zod schema
-  UserCode: string;
+  UserCode?: string;
   FirstName: string;
   MiddleName?: string;
   LastName: string;
@@ -23,15 +23,17 @@ export interface UsersResponse {
   message?: string;
 }
 
-export const getUsers = async (): Promise<UsersResponse> => {
-  const response = await axiosInstance.get<UsersResponse>("/users");
-  console.log(response);
+export const getUsers = async (page = 1, limit = 10, sortBy = "FirstName", sortOrder = "asc"): Promise<UsersResponse> => {
+  const response = await axiosInstance.get<UsersResponse>("/users", {
+    params: { page, limit, sortBy, sortOrder },
+  });
   return response.data;
 };
 
 export interface AddUserPayload {
-  UserId: number;           // matches Zod schema
-  UserCode: string;
+  _id?: string;
+  UserId?: number;           // matches Zod schema
+  UserCode?: string;
   FirstName: string;
   MiddleName?: string;
   LastName: string;
@@ -45,8 +47,14 @@ export interface AddUserPayload {
   archivedAt?: string;
 }
 
-export const addUsers = async (payload: AddUserPayload): Promise<UsersResponse> => {
-  const response = await axiosInstance.post<UsersResponse>("/users", payload);
+export interface UsersAddResponse {
+  success: boolean;
+  data: UsersItem;
+  message?: string;
+}
+
+export const addUsers = async (payload: AddUserPayload): Promise<UsersAddResponse> => {
+  const response = await axiosInstance.post<UsersAddResponse>("/users", payload);
   return response.data;
 };
 
