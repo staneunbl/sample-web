@@ -32,14 +32,14 @@ export const getUsers = async (page = 1, limit = 10, sortBy = "FirstName", sortO
 
 export interface AddUserPayload {
   _id?: string;
-  UserId?: number;           // matches Zod schema
+  UserId?: number;
   UserCode?: string;
   FirstName: string;
   MiddleName?: string;
   LastName: string;
   Sex: 'Male' | 'Female';
   Role: string;
-  DateOfBirth: string;      // ISO date string
+  DateOfBirth: string;
   Email: string;
   PhoneNumber: string;
   Status?: 'Active' | 'Archived' | 'Suspended';
@@ -47,14 +47,14 @@ export interface AddUserPayload {
   archivedAt?: string;
 }
 
-export interface UsersAddResponse {
+export interface UserResponse {
   success: boolean;
   data: UsersItem;
   message?: string;
 }
 
-export const addUsers = async (payload: AddUserPayload): Promise<UsersAddResponse> => {
-  const response = await axiosInstance.post<UsersAddResponse>("/users", payload);
+export const addUsers = async (payload: AddUserPayload): Promise<UserResponse> => {
+  const response = await axiosInstance.post<UserResponse>("/users", payload);
   return response.data;
 };
 
@@ -75,8 +75,8 @@ export interface UpdateUserPayload {
   archivedAt?: string;
 }
 
-export const updateUser = async (payload: UpdateUserPayload): Promise<UsersResponse> => {
-  const response = await axiosInstance.patch<UsersResponse>(`/users/${payload._id}`, {
+export const updateUser = async (payload: UpdateUserPayload): Promise<UserResponse> => {
+  const response = await axiosInstance.patch<UserResponse>(`/users/${payload._id}`, {
     FirstName: payload.FirstName,
     MiddleName: payload.MiddleName,
     LastName: payload.LastName,

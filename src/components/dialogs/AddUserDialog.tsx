@@ -121,7 +121,7 @@ export function AddUserDialog({
       if (response && response.success && response.data) {
         const newUser: UsersItem = {
           _id: response.data._id,
-          UserId: 0,
+          UserId: response.data.UserId,
           UserCode: response.data.UserCode,
           ...payload,
           Status: "Active",

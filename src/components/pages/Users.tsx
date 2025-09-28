@@ -320,7 +320,7 @@ export default function UsersList() {
 
   const handleDelete = async (_id: string) => {
     try {
-      await deleteUser(_id); // your API call
+      await deleteUser(_id);
       toast({
         title: "Deleted!",
         variant: "success",

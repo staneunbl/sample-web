@@ -143,8 +143,6 @@ export function EditUserDialog({
       if (response && response.success) {
         const newUser: UsersItem = {
           _id: selectedUser._id,
-          Status: "Active",
-          Archived: false,
           ...payload,
         };
 
