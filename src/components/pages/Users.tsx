@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   Pencil,
   Plus,
+  RotateCcw,
   Search,
   Trash,
 } from "lucide-react";
@@ -43,7 +44,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { archiveUser, deleteUser, getUsers, UsersItem } from "@/services/users/users.api";
+import { archiveUser, deleteUser, getUsers, reactivateUser, UsersItem } from "@/services/users/users.api";
 import { AddUserDialog } from "../dialogs/AddUserDialog";
 import { EditUserDialog } from "../dialogs/EditUserDialog";
 import ViewUserDrawer from "../dialogs/ViewUserDrawer";
@@ -51,7 +52,7 @@ import ViewUserDrawer from "../dialogs/ViewUserDrawer";
 interface ActionDialogProps {
   _id: string;
   itemId: number;
-  actionType: "archive" | "delete";
+  actionType: "archive" | "reactivate" | "delete";
   onConfirm: (id: string) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -67,13 +68,16 @@ function ActionDialog({
   onOpenChange,
   itemName,
 }: ActionDialogProps) {
+
   const actionLabels = {
     archive: "Archive",
+    reactivate: "Reactivate",
     delete: "Delete",
   };
 
   const actionColors = {
     archive: "bg-yellow-500 hover:bg-yellow-600",
+    reactivate: "bg-green-500 hover:bg-green-600",
     delete: "bg-red-500 hover:bg-red-600",
   };
 
@@ -109,9 +113,8 @@ export default function UsersList() {
   const [users, setUsers] = useState<UsersItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 400);
-
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [actionType, setActionType] = useState<"archive" | "delete" | null>(null);
+  const [actionType, setActionType] = useState<"archive" | "reactivate" | "delete" | null>(null);
   const [open, setOpen] = useState(false);
   const [editselectedUserDialogOpen, setEditselectedUserDialogOpen] = useState(false);
   const [addselectedUserDialogOpen, setAddselectedUserDialogOpen] = useState(false);
@@ -236,6 +239,7 @@ export default function UsersList() {
       header: "",
       cell: ({ row }) => {
         const user = row.original;
+        const isArchivedUser = row.original.Archived;
 
         return (
           <div className="text-center">
@@ -246,15 +250,6 @@ export default function UsersList() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="text-xs"
-                  onClick={() => {
-                    setSelectedUser(row.original);
-                    setViewselectedUserDrawerOpen(true);
-                  }}
-                >
-                  <Eye className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                  View User
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-xs"
                   onClick={() => {
@@ -266,18 +261,32 @@ export default function UsersList() {
                   Edit User
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-xs"
-                  variant="archive"
-                  onClick={() => {
-                    setSelectedUser(row.original);
-                    setActionType("archive");
-                    setOpen(true);
-                  }}
-                >
-                  <Archive className="text-warning mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                  Archive User
-                </DropdownMenuItem>
+                {isArchivedUser ? (
+                  <DropdownMenuItem
+                    className="text-xs text-green-700"
+                    onClick={() => {
+                      setSelectedUser(row.original);
+                      setActionType("reactivate");
+                      setOpen(true);
+                    }}
+                  >
+                    <RotateCcw className="text-green-600 mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                    Reactivate User
+                  </DropdownMenuItem>
+                ): (  
+                  <DropdownMenuItem
+                    className="text-xs"
+                    variant="archive"
+                    onClick={() => {
+                      setSelectedUser(row.original);
+                      setActionType("archive");
+                      setOpen(true);
+                    }}
+                  >
+                    <Archive className="text-warning mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                    Archive User
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   className="text-xs"
                   variant="destructive"
@@ -314,6 +323,26 @@ export default function UsersList() {
         title: "Error!",
         variant: "destructive",
         description: "There was an error archiving the user.",
+      });
+    }
+  };
+
+  const handleReactivate = async (_id: string) => {
+    try {
+      await reactivateUser(_id);
+      toast({
+        title: "Reactivated!!",
+        variant: "success",
+        description: "The user has been successfully reactivated.",
+      });
+
+      fetchUsers();
+    } catch (error) {
+      console.error("Error reactivating user:", error);
+      toast({
+        title: "Error!",
+        variant: "destructive",
+        description: "There was an error reactivated the user.",
       });
     }
   };
@@ -478,6 +507,7 @@ export default function UsersList() {
         onOpenChange={setOpen}
         onConfirm={async (_id: string) => {
           if (actionType === "archive") await handleArchive(_id);
+          if (actionType === "reactivate") await handleReactivate(_id);
           if (actionType === "delete") await handleDelete(_id);
           setOpen(false);
         }}

@@ -90,25 +90,38 @@ export const updateUser = async (payload: UpdateUserPayload): Promise<UserRespon
   return response.data;
 };
 
-export const deleteUser = async (_id: string) => {
-  try {
-    const response = await axiosInstance.delete(`/users/hard/${_id}`);
-    return response.data;
-  } catch (error: any) {
-    console.error("Error deleting user:", error);
-    return {
-      success: false,
-      message: error.response?.data?.message || "Failed to delete user",
-    };
-  }
-};
-
 export const archiveUser = async (_id: string) => {
   try {
     const response = await axiosInstance.patch(`/users/archive/${_id}`);
     return response.data;
   } catch (error: any) {
     console.error("Error archiving user:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Failed to archive user",
+    };
+  }
+};
+
+export const reactivateUser = async (_id: string) => {
+  try {
+    const response = await axiosInstance.patch(`/users/unarchive/${_id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error reactivating user:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Failed to reactivate user",
+    };
+  }
+};
+
+export const deleteUser = async (_id: string) => {
+  try {
+    const response = await axiosInstance.delete(`/users/hard/${_id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error deleting user:", error);
     return {
       success: false,
       message: error.response?.data?.message || "Failed to delete user",
